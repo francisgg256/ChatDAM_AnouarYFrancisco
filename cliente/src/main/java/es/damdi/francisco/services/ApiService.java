@@ -18,6 +18,7 @@ import java.util.List;
  */
 public class ApiService {
 
+    // La dirección real del servidor Wi-Fi de Anouar
     private static final String BASE_URL = "http://192.168.25.27:8080/api";
 
     private HttpClient httpClient;
@@ -101,25 +102,22 @@ public class ApiService {
     }
 
     /**
-     * Envía una petición POST para dar de alta a un nuevo empleado en la base de datos.
+     * Envía una petición POST para dar de alta a un nuevo empleado en la base de datos, incluyendo su rol.
      */
-    public boolean registrarEmpleado(String usuario, String passwordCifrada) {
+    public boolean registrarEmpleado(String usuario, String passwordCifrada, String rol) {
         try {
-            // Reutilizamos el objeto LoginRequest porque tiene "nombreUsuario" y "password",
-            // que es exactamente lo que Anouar necesita para crear un usuario.
-            LoginRequest request = new LoginRequest(usuario, passwordCifrada);
+            // Ahora usamos nuestro nuevo RegistroRequest que incluye el rol
+            es.damdi.francisco.models.RegistroRequest request = new es.damdi.francisco.models.RegistroRequest(usuario, passwordCifrada, rol);
             String jsonBody = gson.toJson(request);
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
-                    // ⚠️ IMPORTANTE: Pregunta a Anouar si la ruta es "/registro", "/usuarios" o "/empleados"
-                    .uri(URI.create(BASE_URL + "/registro"))
+                    .uri(URI.create(BASE_URL + "/usuarios"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
 
             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-            // Si el servidor devuelve 200 (OK) o 201 (Creado), fue un éxito
             return response.statusCode() == 200 || response.statusCode() == 201;
 
         } catch (Exception e) {

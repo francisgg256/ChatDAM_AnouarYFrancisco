@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ChatDAM_Client</artifactId>
+    <artifactId>cliente</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
