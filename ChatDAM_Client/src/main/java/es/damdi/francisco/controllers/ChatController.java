@@ -34,52 +34,54 @@ public class ChatController {
      * Configura el servicio de multicast y lanza el hilo de escucha para recibir
      * mensajes entrantes de otros clientes.
      */
+    // Añade esta variable al principio de la clase, debajo de MulticastService
+    private es.damdi.francisco.services.ApiService apiService;
+
     @FXML
     public void initialize() {
         multicastService = new MulticastService();
+        apiService = new es.damdi.francisco.services.ApiService(); // Iniciamos la API
 
-        // Mensaje de bienvenida inicial en la UI
         listaMensajes.getItems().add("Sistema: Hola " + SesionGlobal.usuarioActual + ", conectado al chat.");
 
-        // Ponemos a escuchar el chat en segundo plano para no bloquear la interfaz
+        // CONEXIÓN REAL: Cargar los 10 últimos mensajes de la Base de Datos
+        java.util.List<es.damdi.francisco.models.MensajeDTO> historial = apiService.getUltimosMensajes();
+        for (es.damdi.francisco.models.MensajeDTO m : historial) {
+            listaMensajes.getItems().add(m.getAutor() + " [" + m.getHora() + "]: " + m.getContenido());
+        }
+
         multicastService.escucharMensajes(mensaje -> {
-            // Platform.runLater es OBLIGATORIO para actualizar componentes de JavaFX desde un hilo secundario
             Platform.runLater(() -> listaMensajes.getItems().add(mensaje));
         });
 
-        // REQUISITO OPCIONAL: Mostrar u ocultar el menú según el rol
-        if (SesionGlobal.rolActual.equals("ADMINISTRADOR")) {
+        if ("ADMINISTRADOR".equals(SesionGlobal.rolActual)) {
             menuGestion.setVisible(true);
-            // Le damos funcionalidad al botón del menú para abrir la ventana
             menuGestion.setOnAction(e -> abrirVentanaGestion());
         } else {
             menuGestion.setVisible(false);
         }
     }
 
-    /**
-     * Gestiona el evento de clic en el botón de enviar.
-     * Formatea el mensaje con el nombre del usuario actual y lo transmite a la red.
-     * * @param event El evento de acción disparado por el botón.
-     */
     @FXML
     public void enviarMensaje(ActionEvent event) {
         String texto = txtMensaje.getText();
 
         if (!texto.trim().isEmpty()) {
-            // Formateamos el mensaje: "usuario: texto"
+            // 1. Enviamos por red Multicast (Tiempo Real)
             String mensajeFormateado = SesionGlobal.usuarioActual + ": " + texto;
-
-            // Enviamos el mensaje por la red multicast para que otros clientes lo reciban
             multicastService.enviarMensaje(mensajeFormateado);
 
-            // Limpiamos la caja de texto tras el envío
-            txtMensaje.clear();
+            // 2. Preparamos fecha y hora
+            String fechaStr = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            String horaStr = java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"));
 
-            // TODO: Integrar aquí la llamada al ApiService (POST) para persistir el mensaje en la base de datos Spring Boot.
+            // 3. CONEXIÓN REAL: Guardamos en MongoDB
+            es.damdi.francisco.models.MensajeDTO nuevoMensaje = new es.damdi.francisco.models.MensajeDTO(texto, SesionGlobal.usuarioActual, fechaStr, horaStr);
+            apiService.guardarMensaje(nuevoMensaje);
+
+            txtMensaje.clear();
         }
     }
-
     /**
      * Gestiona el cierre de la aplicación.
      * Se encarga de cerrar la conexión multicast de forma segura antes de terminar.

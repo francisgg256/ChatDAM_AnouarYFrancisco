@@ -50,24 +50,31 @@ public class LoginController {
             return;
         }
 
-        // Simulación de validación (Hasta que se conecte la API)
-        if (password.equals("1234")) {
+        // 1. Ciframos la contraseña
+        String passwordCifrada = es.damdi.francisco.utils.SeguridadUtil.cifrarContrasena(password);
+
+        // 2. CONEXIÓN REAL: Llamamos a la API de Anouar
+        es.damdi.francisco.services.ApiService apiService = new es.damdi.francisco.services.ApiService();
+        String rolRecibido = apiService.hacerLogin(usuario, passwordCifrada);
+
+        // 3. Comprobamos la respuesta
+        if (rolRecibido != null) {
+            // ¡Login correcto! Guardamos datos de sesión
             SesionGlobal.usuarioActual = usuario;
-            // Asignamos el rol según el nombre
-            SesionGlobal.rolActual = usuario.toLowerCase().equals("admin") ? "ADMINISTRADOR" : "EMPLEADO";
+            SesionGlobal.rolActual = rolRecibido;
 
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/es/damdi/francisco/Chat.fxml"));
                 Parent root = loader.load();
                 Stage stage = (Stage) btnLogin.getScene().getWindow();
                 stage.setScene(new Scene(root, 600, 500));
-                stage.setTitle("Chat Corporativo - " + SesionGlobal.rolActual);
+                stage.setTitle("Chat Corporativo - Rol: " + SesionGlobal.rolActual);
                 stage.centerOnScreen();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            // REQUISITO OBLIGATORIO: Abrir nueva ventana de error y cerrar app
+            // ¡Login fallido! Mostramos ventana de error
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/es/damdi/francisco/ErrorLogin.fxml"));
                 Parent root = loader.load();
@@ -77,7 +84,6 @@ public class LoginController {
                 errorStage.setResizable(false);
                 errorStage.show();
 
-                // Cerramos la ventana de login actual
                 ((Stage) btnLogin.getScene().getWindow()).close();
             } catch (IOException e) {
                 e.printStackTrace();

@@ -3,6 +3,7 @@ package es.damdi.francisco.services;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import es.damdi.francisco.models.LoginRequest;
+import es.damdi.francisco.models.LoginResponse;
 import es.damdi.francisco.models.MensajeDTO;
 
 import java.net.URI;
@@ -14,32 +15,24 @@ import java.util.List;
 
 /**
  * Servicio encargado de la comunicación cliente-servidor con el backend (Spring Boot).
- * Utiliza {@link HttpClient} para realizar peticiones HTTP (GET/POST) y {@link Gson}
- * para la serialización y deserialización de objetos hacia/desde formato JSON.
  */
 public class ApiService {
 
-    /** URL base donde se encuentra expuesta la API REST. */
-    private static final String BASE_URL = "http://localhost:8080/api";
+    private static final String BASE_URL = "http://192.168.25.27:8080/api";
 
     private HttpClient httpClient;
     private Gson gson;
 
-    /**
-     * Inicializa el cliente HTTP y el motor de conversión JSON.
-     */
     public ApiService() {
         this.httpClient = HttpClient.newHttpClient();
         this.gson = new Gson();
     }
 
     /**
-     * Realiza una petición POST para autenticar al usuario contra el servidor.
-     * @param usuario El nombre de usuario ingresado.
-     * @param passwordCifrada La contraseña cifrada (SHA-256) enviada al servidor.
-     * @return true si la autenticación es exitosa (código 200), false en caso contrario.
+     * Realiza una petición POST para autenticar al usuario.
+     * Devuelve el rol del usuario si el login es correcto, o null si falla.
      */
-    public boolean hacerLogin(String usuario, String passwordCifrada) {
+    public String hacerLogin(String usuario, String passwordCifrada) {
         try {
             LoginRequest request = new LoginRequest(usuario, passwordCifrada);
             String jsonBody = gson.toJson(request);
@@ -51,18 +44,22 @@ public class ApiService {
                     .build();
 
             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            return response.statusCode() == 200;
+
+            if (response.statusCode() == 200) {
+                // Leemos el JSON de Anouar y extraemos el rol
+                LoginResponse loginRes = gson.fromJson(response.body(), LoginResponse.class);
+                return loginRes.getRol();
+            }
+            return null; // Credenciales incorrectas
 
         } catch (Exception e) {
             System.err.println("Aviso: No se pudo conectar al servidor para el login. " + e.getMessage());
-            return false;
+            return null;
         }
     }
 
     /**
-     * Envía un mensaje al servidor mediante una petición POST para que sea
-     * persistido en la base de datos remota.
-     * @param mensaje El objeto {@link MensajeDTO} que contiene los datos del mensaje.
+     * Envía un mensaje al servidor para guardarlo en BD.
      */
     public void guardarMensaje(MensajeDTO mensaje) {
         try {
@@ -82,9 +79,7 @@ public class ApiService {
     }
 
     /**
-     * Realiza una petición GET al servidor para recuperar el historial reciente de mensajes.
-     * @return Una {@link List} de {@link MensajeDTO} con los mensajes recuperados,
-     * o una lista vacía si la conexión falla.
+     * Obtiene el historial de mensajes del servidor.
      */
     public List<MensajeDTO> getUltimosMensajes() {
         try {
@@ -103,5 +98,33 @@ public class ApiService {
         }
 
         return new ArrayList<>();
+    }
+
+    /**
+     * Envía una petición POST para dar de alta a un nuevo empleado en la base de datos.
+     */
+    public boolean registrarEmpleado(String usuario, String passwordCifrada) {
+        try {
+            // Reutilizamos el objeto LoginRequest porque tiene "nombreUsuario" y "password",
+            // que es exactamente lo que Anouar necesita para crear un usuario.
+            LoginRequest request = new LoginRequest(usuario, passwordCifrada);
+            String jsonBody = gson.toJson(request);
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    // ⚠️ IMPORTANTE: Pregunta a Anouar si la ruta es "/registro", "/usuarios" o "/empleados"
+                    .uri(URI.create(BASE_URL + "/registro"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+            // Si el servidor devuelve 200 (OK) o 201 (Creado), fue un éxito
+            return response.statusCode() == 200 || response.statusCode() == 201;
+
+        } catch (Exception e) {
+            System.err.println("Error al intentar registrar: " + e.getMessage());
+            return false;
+        }
     }
 }
