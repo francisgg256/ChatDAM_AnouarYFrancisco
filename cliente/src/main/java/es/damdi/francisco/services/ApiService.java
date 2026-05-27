@@ -13,12 +13,8 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Servicio encargado de la comunicación cliente-servidor con el backend (Spring Boot).
- */
 public class ApiService {
 
-    // La dirección real del servidor Wi-Fi de Anouar
     private static final String BASE_URL = "http://192.168.25.27:8080/api";
 
     private HttpClient httpClient;
@@ -29,10 +25,6 @@ public class ApiService {
         this.gson = new Gson();
     }
 
-    /**
-     * Realiza una petición POST para autenticar al usuario.
-     * Devuelve el rol del usuario si el login es correcto, o null si falla.
-     */
     public String hacerLogin(String usuario, String passwordCifrada) {
         try {
             LoginRequest request = new LoginRequest(usuario, passwordCifrada);
@@ -47,11 +39,10 @@ public class ApiService {
             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                // Leemos el JSON de Anouar y extraemos el rol
                 LoginResponse loginRes = gson.fromJson(response.body(), LoginResponse.class);
                 return loginRes.getRol();
             }
-            return null; // Credenciales incorrectas
+            return null;
 
         } catch (Exception e) {
             System.err.println("Aviso: No se pudo conectar al servidor para el login. " + e.getMessage());
@@ -59,9 +50,6 @@ public class ApiService {
         }
     }
 
-    /**
-     * Envía un mensaje al servidor para guardarlo en BD.
-     */
     public void guardarMensaje(MensajeDTO mensaje) {
         try {
             String jsonBody = gson.toJson(mensaje);
@@ -79,9 +67,6 @@ public class ApiService {
         }
     }
 
-    /**
-     * Obtiene el historial de mensajes del servidor.
-     */
     public List<MensajeDTO> getUltimosMensajes() {
         try {
             HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -101,12 +86,8 @@ public class ApiService {
         return new ArrayList<>();
     }
 
-    /**
-     * Envía una petición POST para dar de alta a un nuevo empleado en la base de datos, incluyendo su rol.
-     */
     public boolean registrarEmpleado(String usuario, String passwordCifrada, String rol) {
         try {
-            // Ahora usamos nuestro nuevo RegistroRequest que incluye el rol
             es.damdi.francisco.models.RegistroRequest request = new es.damdi.francisco.models.RegistroRequest(usuario, passwordCifrada, rol);
             String jsonBody = gson.toJson(request);
 

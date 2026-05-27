@@ -12,21 +12,20 @@ public class GestionEmpleadoController {
 
     @FXML private TextField txtNuevoUsuario;
     @FXML private PasswordField txtNuevaPassword;
-    @FXML private ComboBox<String> cmbRol; // Referencia al nuevo ComboBox
+    @FXML private ComboBox<String> cmbRol;
     @FXML private Label lblMensaje;
 
     @FXML
     public void initialize() {
-        // Llenamos el desplegable con los roles disponibles
         cmbRol.getItems().addAll("EMPLEADO", "ADMINISTRADOR");
-        cmbRol.getSelectionModel().selectFirst(); // Por defecto selecciona EMPLEADO
+        cmbRol.getSelectionModel().selectFirst();
     }
 
     @FXML
     public void registrarEmpleado(ActionEvent event) {
         String usuario = txtNuevoUsuario.getText();
         String password = txtNuevaPassword.getText();
-        String rol = cmbRol.getValue(); // Obtenemos el rol elegido
+        String rol = cmbRol.getValue();
 
         if (usuario.isEmpty() || password.isEmpty() || rol == null) {
             lblMensaje.setText("Rellena todos los campos.");
@@ -34,10 +33,8 @@ public class GestionEmpleadoController {
             return;
         }
 
-        // Ciframos la contraseña
         String passwordCifrada = SeguridadUtil.cifrarContrasena(password);
 
-        // CONEXIÓN REAL: Llamamos a la API enviando también el rol
         es.damdi.francisco.services.ApiService apiService = new es.damdi.francisco.services.ApiService();
         boolean exito = apiService.registrarEmpleado(usuario, passwordCifrada, rol);
 

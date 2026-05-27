@@ -1,35 +1,27 @@
-/* =========================================
-   PALETA DE COLORES Y ESTILOS GENERALES
-   ========================================= */
 .root {
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 14px;
-    -fx-background-color: #f4f4f4; /* Gris muy claro de fondo */
+    -fx-background-color: #f4f4f4;
 }
 
-/* Títulos principales */
 .label-titulo {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
     -fx-text-fill: #333333;
 }
 
-/* Campos de texto y password */
 .text-field, .password-field {
     -fx-background-color: white;
-    -fx-background-radius: 5; /* Bordes redondeados */
+    -fx-background-radius: 5;
     -fx-border-color: #cccccc;
     -fx-border-radius: 5;
     -fx-padding: 8 12;
 }
 .text-field:focused, .password-field:focused {
-    -fx-border-color: #2196F3; /* Azul al seleccionar */
+    -fx-border-color: #2196F3;
     -fx-border-width: 2;
 }
 
-/* =========================================
-   ESTILOS DE BOTONES
-   ========================================= */
 .button {
     -fx-background-radius: 5;
     -fx-padding: 8 20;
@@ -37,16 +29,14 @@
     -fx-font-weight: bold;
 }
 
-/* Botón Primario (Azul Corporativo) */
 .button-primario {
     -fx-background-color: #2196F3;
     -fx-text-fill: white;
 }
 .button-primario:hover {
-    -fx-background-color: #1976D2; /* Azul más oscuro al pasar el ratón */
+    -fx-background-color: #1976D2;
 }
 
-/* Botón de Peligro (Rojo para Salir/Errores) */
 .button-danger {
     -fx-background-color: #f44336;
     -fx-text-fill: white;
@@ -55,9 +45,6 @@
     -fx-background-color: #d32f2f;
 }
 
-/* =========================================
-   ESTILOS ESPECÍFICOS DEL CHAT
-   ========================================= */
 .list-view {
     -fx-background-color: white;
     -fx-background-radius: 5;
@@ -65,18 +52,16 @@
     -fx-border-radius: 5;
 }
 
-/* Estilo para los mensajes dentro de la lista */
 .list-cell {
     -fx-padding: 10;
     -fx-background-color: white;
     -fx-border-color: #eeeeee;
-    -fx-border-width: 0 0 1 0; /* Solo línea inferior */
+    -fx-border-width: 0 0 1 0;
 }
 .list-cell:filled:hover {
-    -fx-background-color: #f1f8ff; /* Fondo azulito claro al pasar el ratón */
+    -fx-background-color: #f1f8ff;
 }
 
-/* Barra de menú superior */
 .menu-bar {
     -fx-background-color: white;
     -fx-border-color: #dddddd;

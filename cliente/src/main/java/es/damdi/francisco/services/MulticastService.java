@@ -5,11 +5,6 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.function.Consumer;
 
-/**
- * Servicio encargado de la comunicación en tiempo real mediante Sockets Multicast (UDP).
- * Permite a los clientes enviar mensajes a un grupo específico y escuchar de forma
- * asíncrona los mensajes emitidos por otros clientes conectados al mismo grupo.
- */
 public class MulticastService {
 
     private static final String GRUPO_IP = "230.0.0.0";
@@ -18,9 +13,6 @@ public class MulticastService {
     private InetAddress grupo;
     private boolean escuchando = true;
 
-    /**
-     * Constructor que inicializa el socket y se une al grupo multicast definido.
-     */
     public MulticastService() {
         try {
             grupo = InetAddress.getByName(GRUPO_IP);
@@ -31,10 +23,6 @@ public class MulticastService {
         }
     }
 
-    /**
-     * Envía un mensaje de texto al grupo multicast definido.
-     * @param mensaje El contenido del mensaje a enviar.
-     */
     public void enviarMensaje(String mensaje) {
         try {
             byte[] buffer = mensaje.getBytes();
@@ -45,12 +33,6 @@ public class MulticastService {
         }
     }
 
-    /**
-     * Inicia un hilo de ejecución independiente para escuchar mensajes entrantes
-     * del grupo multicast.
-     * @param alRecibirMensaje Un {@link Consumer} que define qué hacer con el mensaje
-     * cuando se recibe (por ejemplo, actualizar la UI).
-     */
     public void escucharMensajes(Consumer<String> alRecibirMensaje) {
         Thread hiloEscucha = new Thread(() -> {
             try {
@@ -60,20 +42,16 @@ public class MulticastService {
                     socket.receive(paquete);
                     String mensajeRecibido = new String(paquete.getData(), 0, paquete.getLength());
 
-                    // Cuando llega un mensaje, avisamos a la interfaz a través del consumidor
                     alRecibirMensaje.accept(mensajeRecibido);
                 }
             } catch (Exception e) {
                 if (escuchando) e.printStackTrace();
             }
         });
-        hiloEscucha.setDaemon(true); // El hilo muere automáticamente al cerrar la aplicación
+        hiloEscucha.setDaemon(true);
         hiloEscucha.start();
     }
 
-    /**
-     * Cierra la conexión de forma segura, abandonando el grupo y liberando el socket.
-     */
     public void cerrarConexion() {
         try {
             escuchando = false;

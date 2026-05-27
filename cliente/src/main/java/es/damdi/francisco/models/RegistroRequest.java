@@ -1,8 +1,5 @@
 package es.damdi.francisco.models;
 
-/**
- * DTO para enviar los datos completos de un nuevo empleado a la API.
- */
 public class RegistroRequest {
     private String nombreUsuario;
     private String password;

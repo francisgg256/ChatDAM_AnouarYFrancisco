@@ -1,11 +1,7 @@
 package es.damdi.francisco.models;
 
-/**
- * Objeto de transferencia de datos (DTO) utilizado para empaquetar las credenciales.
- */
 public class LoginRequest {
 
-    // Cambiamos "usuario" por "nombreUsuario" para coincidir con el Backend
     private String nombreUsuario;
     private String password;
 

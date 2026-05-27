@@ -14,11 +14,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-/**
- * Controlador de la vista de login.
- * Gestiona la validación de las credenciales del usuario, el establecimiento
- * de la sesión global y la transición a la pantalla principal del chat.
- */
 public class LoginController {
 
     @FXML
@@ -33,12 +28,6 @@ public class LoginController {
     @FXML
     private Label lblError;
 
-    /**
-     * Procesa la acción de inicio de sesión al pulsar el botón correspondiente.
-     * Verifica que los campos no estén vacíos y valida la contraseña.
-     * En caso de éxito, guarda el usuario en SesionGlobal y carga la vista de chat.
-     * * @param event El evento de acción disparado por el botón de login.
-     */
     @FXML
     public void iniciarSesion(ActionEvent event) {
         String usuario = txtUsuario.getText();
@@ -50,16 +39,12 @@ public class LoginController {
             return;
         }
 
-        // 1. Ciframos la contraseña
         String passwordCifrada = es.damdi.francisco.utils.SeguridadUtil.cifrarContrasena(password);
 
-        // 2. CONEXIÓN REAL: Llamamos a la API de Anouar
         es.damdi.francisco.services.ApiService apiService = new es.damdi.francisco.services.ApiService();
         String rolRecibido = apiService.hacerLogin(usuario, passwordCifrada);
 
-        // 3. Comprobamos la respuesta
         if (rolRecibido != null) {
-            // ¡Login correcto! Guardamos datos de sesión
             SesionGlobal.usuarioActual = usuario;
             SesionGlobal.rolActual = rolRecibido;
 
@@ -74,7 +59,6 @@ public class LoginController {
                 e.printStackTrace();
             }
         } else {
-            // ¡Login fallido! Mostramos ventana de error
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/es/damdi/francisco/ErrorLogin.fxml"));
                 Parent root = loader.load();
