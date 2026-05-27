@@ -43,43 +43,45 @@ public class LoginController {
     public void iniciarSesion(ActionEvent event) {
         String usuario = txtUsuario.getText();
         String password = txtPassword.getText();
-
-        // Limpiamos mensajes de error anteriores antes de procesar
         lblError.setText("");
 
-        // Validación básica de campos
         if (usuario.isEmpty() || password.isEmpty()) {
             lblError.setText("Por favor, rellena todos los campos.");
-        } else if (password.equals("1234")) {
+            return;
+        }
 
-            // Guardamos el usuario en la sesión global para que sea accesible en otras vistas
+        // Simulación de validación (Hasta que se conecte la API)
+        if (password.equals("1234")) {
             SesionGlobal.usuarioActual = usuario;
-
-            lblError.setStyle("-fx-text-fill: green;");
-            lblError.setText("¡Login correcto! Entrando al chat...");
+            // Asignamos el rol según el nombre
+            SesionGlobal.rolActual = usuario.toLowerCase().equals("admin") ? "ADMINISTRADOR" : "EMPLEADO";
 
             try {
-                // Cargamos el diseño del chat
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/es/damdi/francisco/Chat.fxml"));
                 Parent root = loader.load();
-
-                // Obtenemos el Stage (ventana) actual para cambiar su escena
                 Stage stage = (Stage) btnLogin.getScene().getWindow();
                 stage.setScene(new Scene(root, 600, 500));
-                stage.setTitle("Chat Corporativo - Sala Principal");
+                stage.setTitle("Chat Corporativo - " + SesionGlobal.rolActual);
                 stage.centerOnScreen();
-
             } catch (IOException e) {
-                // Manejo de errores en caso de que el archivo FXML no se encuentre
                 e.printStackTrace();
-                lblError.setStyle("-fx-text-fill: red;");
-                lblError.setText("Error crítico al cargar el chat.");
             }
-
         } else {
-            // Error en la autenticación
-            lblError.setStyle("-fx-text-fill: red;");
-            lblError.setText("Contraseña incorrecta (Usa 1234).");
+            // REQUISITO OBLIGATORIO: Abrir nueva ventana de error y cerrar app
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/es/damdi/francisco/ErrorLogin.fxml"));
+                Parent root = loader.load();
+                Stage errorStage = new Stage();
+                errorStage.setScene(new Scene(root));
+                errorStage.setTitle("Error de Login");
+                errorStage.setResizable(false);
+                errorStage.show();
+
+                // Cerramos la ventana de login actual
+                ((Stage) btnLogin.getScene().getWindow()).close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

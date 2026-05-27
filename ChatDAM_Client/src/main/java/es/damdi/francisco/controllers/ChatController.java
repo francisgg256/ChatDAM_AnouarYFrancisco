@@ -46,6 +46,15 @@ public class ChatController {
             // Platform.runLater es OBLIGATORIO para actualizar componentes de JavaFX desde un hilo secundario
             Platform.runLater(() -> listaMensajes.getItems().add(mensaje));
         });
+
+        // REQUISITO OPCIONAL: Mostrar u ocultar el menú según el rol
+        if (SesionGlobal.rolActual.equals("ADMINISTRADOR")) {
+            menuGestion.setVisible(true);
+            // Le damos funcionalidad al botón del menú para abrir la ventana
+            menuGestion.setOnAction(e -> abrirVentanaGestion());
+        } else {
+            menuGestion.setVisible(false);
+        }
     }
 
     /**
@@ -84,5 +93,18 @@ public class ChatController {
         // Finaliza el ciclo de vida de la aplicación JavaFX
         Platform.exit();
         System.exit(0);
+    }
+
+    private void abrirVentanaGestion() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/es/damdi/francisco/GestionEmpleados.fxml"));
+            javafx.scene.Parent root = loader.load();
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setScene(new javafx.scene.Scene(root));
+            stage.setTitle("Panel de Administración");
+            stage.show();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
     }
 }
